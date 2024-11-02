@@ -3,24 +3,24 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-    "log"
-    "strconv"
+	"strconv"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-    "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func connect_to_postgres() *sql.DB {
-    host     := os.Getenv("POSTGRES_HOST")
-    portStr  := os.Getenv("POSTGRES_PORT")
-    user     := os.Getenv("POSTGRES_USER")
-    password := os.Getenv("POSTGRES_PASSWORD")
-    dbname   := os.Getenv("POSTGRES_DBNAME")
+	host := os.Getenv("POSTGRES_HOST")
+	portStr := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_DBNAME")
 
-    port, err := strconv.Atoi(portStr)
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		log.Fatalf("Error converting POSTGRES_PORT to integer: %v", err)
 	}
@@ -37,14 +37,22 @@ func connect_to_postgres() *sql.DB {
 	return db
 }
 
+type ExpenseListEntry struct {
+	ID        string  `json:"id"`
+	Color     string  `json:"color"`
+	Emoji     string  `json:"emoji"`
+	Title     string  `json:"title"`
+	TotalCost float64 `json:"totalcost"`
+}
+
 func main() {
-    err := godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
-    db := connect_to_postgres()
-    err = db.Ping()
+	db := connect_to_postgres()
+	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
@@ -55,5 +63,43 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	e.GET("/user-expense-lists", func(c echo.Context) error {
+
+		expenseLists, err := getExpenseLists(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Error requesting data",
+			})
+		}
+		return c.JSON(http.StatusOK, expenseLists)
+
+	})
+
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+func getExpenseLists(db *sql.DB) ([]ExpenseListEntry, error) {
+	rows, err := db.Query("SELECT * FROM ExpenseList")
+	if err != nil {
+        log.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenseLists []ExpenseListEntry
+	for rows.Next() {
+		var expenseList ExpenseListEntry
+		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.TotalCost)
+		if err != nil {
+            log.Println(err)
+			return nil, err
+		}
+		expenseLists = append(expenseLists, expenseList)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return expenseLists, nil
 }
