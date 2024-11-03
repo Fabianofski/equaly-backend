@@ -42,7 +42,8 @@ type ExpenseListEntry struct {
 	Color     string  `json:"color"`
 	Emoji     string  `json:"emoji"`
 	Title     string  `json:"title"`
-	TotalCost float64 `json:"totalcost"`
+	TotalCost float64 `json:"totalCost"`
+	CreatorId string  `json:"creatorId"`
 }
 
 func main() {
@@ -65,7 +66,11 @@ func main() {
 
 	e.GET("/user-expense-lists", func(c echo.Context) error {
 
-		expenseLists, err := getExpenseLists(db)
+		userId := c.QueryParam("userId")
+		if userId == "" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Bad Request"})
+		}
+		expenseLists, err := getExpenseLists(db, userId)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Error requesting data",
@@ -78,10 +83,10 @@ func main() {
 	e.Logger.Fatal(e.Start(":3000"))
 }
 
-func getExpenseLists(db *sql.DB) ([]ExpenseListEntry, error) {
-	rows, err := db.Query("SELECT * FROM ExpenseList")
+func getExpenseLists(db *sql.DB, userId string) ([]ExpenseListEntry, error) {
+	rows, err := db.Query("SELECT * FROM ExpenseList WHERE creatorId = $1", userId)
 	if err != nil {
-        log.Println(err)
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -89,9 +94,9 @@ func getExpenseLists(db *sql.DB) ([]ExpenseListEntry, error) {
 	var expenseLists []ExpenseListEntry
 	for rows.Next() {
 		var expenseList ExpenseListEntry
-		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.TotalCost)
+		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.TotalCost, &expenseList.CreatorId)
 		if err != nil {
-            log.Println(err)
+			log.Println(err)
 			return nil, err
 		}
 		expenseLists = append(expenseLists, expenseList)
