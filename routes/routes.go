@@ -11,6 +11,6 @@ func SetupRoutes(app *echo.Echo) {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	app.GET("/user-expense-lists", HandlerGetExpenseLists)
+	app.GET("v1/user-expense-lists", HandlerGetExpenseLists)
 }
 

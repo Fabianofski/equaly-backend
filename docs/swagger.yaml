@@ -1,0 +1,44 @@
+basePath: /v1
+definitions:
+  models.Expense:
+    properties:
+      amount:
+        type: number
+      buyer:
+        type: string
+      description:
+        type: string
+      participants:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: This is the backend for the equaly cost management app
+  title: Equaly Backend
+  version: "1.0"
+paths:
+  /user-expense-lists:
+    get:
+      description: Retrieves the list of expenses for a specified user.
+      parameters:
+      - description: User ID to retrieve expenses for
+        in: query
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: List of user expenses
+          schema:
+            items:
+              $ref: '#/definitions/models.Expense'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get Expense Lists
+      tags:
+      - Expenses
+swagger: "2.0"
