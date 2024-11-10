@@ -1,16 +1,12 @@
 package routes 
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
-func SetupRoutes(app *echo.Echo) {
-	app.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
-	app.GET("v1/user-expense-lists", HandlerGetExpenseLists)
+func SetupRoutes(app *echo.Group) {
+	app.GET("/expense-lists", HandlerGetExpenseLists)
+	app.POST("/expense-list", HandlerCreateExpenseList)
+	app.POST("/expense", HandlerCreateExpense)
 }
 

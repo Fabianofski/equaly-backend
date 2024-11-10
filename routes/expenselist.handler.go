@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fabianofski/equaly-backend/db"
+	"github.com/fabianofski/equaly-backend/models"
 	_ "github.com/fabianofski/equaly-backend/models"
 	"github.com/labstack/echo/v4"
 )
@@ -18,20 +19,71 @@ import (
 //	@Success		200		{array}	models.Expense	"List of user expenses"
 //	@Failure		400		"Bad Request"
 //	@Failure		500		"Internal Server Error"
-//	@Router			/user-expense-lists [get]
+//	@Router			/expense-lists [get]
 func HandlerGetExpenseLists(c echo.Context) error {
-    log.Println("GET FOR USER")
-
 	userId := c.QueryParam("userId")
 	if userId == "" {
-		return c.JSON(http.StatusBadRequest, "Bad Request")
+		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
 	expenseLists, err := db.GetExpenseLists(userId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, "Error requesting data")
+        log.Println(err)
+		return c.String(http.StatusInternalServerError, "Error requesting data")
 	}
 
 	return c.JSON(http.StatusOK, expenseLists)
+
+}
+
+// HandlerCreateExpenseLists godoc
+//
+//	@Summary		Create Expense List
+//	@Description	Creates a new Expense list with given data for a specified user
+//	@Tags			Expenses
+//	@Param			expenseList	body		models.ExpenseList	true	"Expense List Data"
+//	@Success		200			"Success"
+//	@Failure		400			"Bad Request"
+//	@Failure		500			"Internal Server Error"
+//	@Router			/expense-list [post]
+func HandlerCreateExpenseList(c echo.Context) error {
+	expenseList := new(models.ExpenseList)
+	if err := c.Bind(expenseList); err != nil {
+		return c.String(http.StatusBadRequest, "Bad Request")
+	}
+
+	err := db.CreateExpenseList(expenseList)
+	if err != nil {
+        log.Println(err)
+		return c.String(http.StatusInternalServerError, "Error posting data")
+	}
+
+	return c.String(http.StatusOK, "Success")
+
+}
+
+// HandlerCreateExpense godoc
+//
+//	@Summary		Create Expense
+//	@Description	Creates a new Expense for an Expense List
+//	@Tags			Expenses
+//	@Param			expense	body		models.Expense	true	"Expense Data"
+//	@Success		200			"Success"
+//	@Failure		400			"Bad Request"
+//	@Failure		500			"Internal Server Error"
+//	@Router			/expense [post]
+func HandlerCreateExpense(c echo.Context) error {
+	expense := new(models.Expense)
+	if err := c.Bind(expense); err != nil {
+		return c.String(http.StatusBadRequest, "Bad Request")
+	}
+
+	err := db.CreateExpense(expense)
+	if err != nil {
+        log.Println(err)
+		return c.String(http.StatusInternalServerError, "Error posting data")
+	}
+
+	return c.String(http.StatusOK, "Success")
 
 }

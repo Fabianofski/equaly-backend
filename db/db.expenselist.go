@@ -55,3 +55,57 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 
 	return expenseLists, nil
 }
+
+func CreateExpenseList(expenseList *ExpenseList) error {
+    db, err := GetPostgresConnection()
+    if err != nil {
+        return err
+    }
+
+    query := `
+        INSERT INTO ExpenseLists (id, color, emoji, title, creatorId, currency)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `
+
+    _, err = db.Exec(query, 
+        expenseList.ID, 
+        expenseList.Color, 
+        expenseList.Emoji, 
+        expenseList.Title, 
+        expenseList.CreatorId, 
+        expenseList.Currency,
+    )
+
+    if err != nil {
+        return err
+    }
+
+    return nil;
+}
+
+func CreateExpense(expense *Expense) error {
+    db, err := GetPostgresConnection()
+    if err != nil {
+        return err
+    }
+
+    query := `
+        INSERT INTO Expenses (id, expenseListId, buyer, amount, description, participants)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `
+
+    _, err = db.Exec(query, 
+        expense.ID,
+        expense.ExpenseListId,
+        expense.Buyer,
+        expense.Amount,
+        expense.Description,
+        expense.Participants,
+    )
+
+    if err != nil {
+        return err
+    }
+
+    return nil;
+}
