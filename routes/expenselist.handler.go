@@ -28,7 +28,7 @@ func HandlerGetExpenseLists(c echo.Context) error {
 
 	expenseLists, err := db.GetExpenseLists(userId)
 	if err != nil {
-        log.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "Error requesting data")
 	}
 
@@ -47,17 +47,28 @@ func HandlerGetExpenseLists(c echo.Context) error {
 //	@Failure		500			"Internal Server Error"
 //	@Router			/expense-list [post]
 func HandlerCreateExpenseList(c echo.Context) error {
+	log.Println("POST Create new Expense List")
 	expenseList := new(models.ExpenseList)
 	if err := c.Bind(expenseList); err != nil {
+		log.Println("400 Bad Request")
+		log.Println(err)
+		return c.String(http.StatusBadRequest, "Bad Request")
+	}
+
+	if expenseList.Color == "" || expenseList.Emoji == "" || expenseList.Title == "" || expenseList.Currency == "" {
+        log.Println(expenseList.Emoji)
+		log.Println("400 Bad Request")
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
 	err := db.CreateExpenseList(expenseList)
 	if err != nil {
-        log.Println(err)
+		log.Println("500 Internal Server Error")
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "Error posting data")
 	}
 
+	log.Println("200 Success")
 	return c.String(http.StatusOK, "Success")
 
 }
@@ -80,7 +91,7 @@ func HandlerCreateExpense(c echo.Context) error {
 
 	err := db.CreateExpense(expense)
 	if err != nil {
-        log.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "Error posting data")
 	}
 

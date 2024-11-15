@@ -63,12 +63,11 @@ func CreateExpenseList(expenseList *ExpenseList) error {
     }
 
     query := `
-        INSERT INTO ExpenseLists (id, color, emoji, title, creatorId, currency)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO ExpenseLists (color, emoji, title, creatorId, currency)
+        VALUES ($1, $2, $3, $4, $5)
     `
 
     _, err = db.Exec(query, 
-        expenseList.ID, 
         expenseList.Color, 
         expenseList.Emoji, 
         expenseList.Title, 
