@@ -31,10 +31,23 @@ definitions:
         type: array
       id:
         type: string
+      participants:
+        items:
+          $ref: '#/definitions/models.Participant'
+        type: array
       title:
         type: string
       totalCost:
         type: number
+    type: object
+  models.Participant:
+    properties:
+      avatarUrl:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
     type: object
 host: localhost:3000
 info:

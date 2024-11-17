@@ -54,9 +54,9 @@ func HandlerCreateExpenseList(c echo.Context) error {
 		log.Println(err)
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
+    log.Println(expenseList)
 
 	if expenseList.Color == "" || expenseList.Emoji == "" || expenseList.Title == "" || expenseList.Currency == "" {
-        log.Println(expenseList.Emoji)
 		log.Println("400 Bad Request")
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}

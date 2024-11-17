@@ -161,11 +161,31 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Participant"
+                    }
+                },
                 "title": {
                     "type": "string"
                 },
                 "totalCost": {
                     "type": "number"
+                }
+            }
+        },
+        "models.Participant": {
+            "type": "object",
+            "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

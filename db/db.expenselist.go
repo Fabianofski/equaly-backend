@@ -7,12 +7,11 @@ import (
 	. "github.com/fabianofski/equaly-backend/models"
 )
 
-
 func GetExpenseLists(userId string) ([]ExpenseList, error) {
-    db, err := GetPostgresConnection()
-    if err != nil {
-        return nil, err
-    }
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := db.Query(`
             SELECT ExpenseLists.*,
@@ -33,8 +32,9 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 	for rows.Next() {
 		var expenseList ExpenseList
 		var expensesJSON string
+		var participantsJSON string
 
-		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &expenseList.TotalCost, &expensesJSON)
+		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -46,6 +46,11 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 			return nil, err
 		}
 
+		err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
 		expenseLists = append(expenseLists, expenseList)
 	}
 
@@ -57,54 +62,60 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 }
 
 func CreateExpenseList(expenseList *ExpenseList) error {
-    db, err := GetPostgresConnection()
-    if err != nil {
-        return err
-    }
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return err
+	}
 
-    query := `
-        INSERT INTO ExpenseLists (color, emoji, title, creatorId, currency)
-        VALUES ($1, $2, $3, $4, $5)
+	query := `
+        INSERT INTO ExpenseLists (color, emoji, title, creatorId, currency, participants)
+        VALUES ($1, $2, $3, $4, $5, $6)
     `
 
-    _, err = db.Exec(query, 
-        expenseList.Color, 
-        expenseList.Emoji, 
-        expenseList.Title, 
-        expenseList.CreatorId, 
-        expenseList.Currency,
-    )
+	participants, err := json.Marshal(expenseList.Participants)
+	if err != nil {
+		return err
+	}
 
-    if err != nil {
-        return err
-    }
+	_, err = db.Exec(query,
+		expenseList.Color,
+		expenseList.Emoji,
+		expenseList.Title,
+		expenseList.CreatorId,
+		expenseList.Currency,
+		participants,
+	)
 
-    return nil;
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CreateExpense(expense *Expense) error {
-    db, err := GetPostgresConnection()
-    if err != nil {
-        return err
-    }
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return err
+	}
 
-    query := `
+	query := `
         INSERT INTO Expenses (id, expenseListId, buyer, amount, description, participants)
         VALUES ($1, $2, $3, $4, $5, $6)
     `
 
-    _, err = db.Exec(query, 
-        expense.ID,
-        expense.ExpenseListId,
-        expense.Buyer,
-        expense.Amount,
-        expense.Description,
-        expense.Participants,
-    )
+	_, err = db.Exec(query,
+		expense.ID,
+		expense.ExpenseListId,
+		expense.Buyer,
+		expense.Amount,
+		expense.Description,
+		expense.Participants,
+	)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    return nil;
+	return nil
 }
