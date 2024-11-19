@@ -117,6 +117,9 @@
                 "buyer": {
                     "type": "string"
                 },
+                "date": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },

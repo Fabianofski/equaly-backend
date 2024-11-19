@@ -100,8 +100,8 @@ func CreateExpense(expense *Expense) error {
 	}
 
 	query := `
-        INSERT INTO Expenses (id, expenseListId, buyer, amount, description, participants)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO Expenses (id, expenseListId, buyer, amount, description, participants, date)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
 
 	_, err = db.Exec(query,
@@ -111,6 +111,7 @@ func CreateExpense(expense *Expense) error {
 		expense.Amount,
 		expense.Description,
 		expense.Participants,
+        expense.Date,
 	)
 
 	if err != nil {

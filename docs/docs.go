@@ -123,6 +123,9 @@ const docTemplate = `{
                 "buyer": {
                     "type": "string"
                 },
+                "date": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
