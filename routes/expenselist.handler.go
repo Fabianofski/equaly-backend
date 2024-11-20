@@ -83,17 +83,21 @@ func HandlerCreateExpenseList(c echo.Context) error {
 //	@Failure		500			"Internal Server Error"
 //	@Router			/expense [post]
 func HandlerCreateExpense(c echo.Context) error {
+	log.Println("POST Create new Expense")
 	expense := new(models.Expense)
 	if err := c.Bind(expense); err != nil {
+		log.Println("400 Bad Request")
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
 	err := db.CreateExpense(expense)
 	if err != nil {
+		log.Println("500 Internal Server Error")
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "Error posting data")
 	}
 
+	log.Println("200 Sucess")
 	return c.String(http.StatusOK, "Success")
 
 }
