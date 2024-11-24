@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/fabianofski/equaly-backend/db"
+	"github.com/fabianofski/equaly-backend/lib"
 	"github.com/fabianofski/equaly-backend/models"
-	_ "github.com/fabianofski/equaly-backend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,7 +32,12 @@ func HandlerGetExpenseLists(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error requesting data")
 	}
 
-	return c.JSON(http.StatusOK, expenseLists)
+	var expenseListWrappers []models.ExpenseListWrapper
+	for _, expenseList := range expenseLists {
+		expenseListWrappers = append(expenseListWrappers, lib.Calculate_shares_and_compensations(expenseList))
+	}
+
+	return c.JSON(http.StatusOK, expenseListWrappers)
 
 }
 

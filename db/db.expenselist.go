@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/json"
 	"log"
+	"slices"
 
 	. "github.com/fabianofski/equaly-backend/models"
 )
@@ -45,6 +46,9 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 			log.Println(err)
 			return nil, err
 		}
+        slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
+            return a.Date.Compare(b.Date)
+        })
 
 		err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
 		if err != nil {
