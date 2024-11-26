@@ -15,7 +15,9 @@ definitions:
       id:
         type: string
       participants:
-        type: string
+        items:
+          type: string
+        type: array
     type: object
   models.ExpenseList:
     properties:
@@ -41,6 +43,41 @@ definitions:
         type: string
       totalCost:
         type: number
+    type: object
+  models.ExpenseListCompensation:
+    properties:
+      amount:
+        type: number
+      from:
+        type: string
+      to:
+        type: string
+    type: object
+  models.ExpenseListShare:
+    properties:
+      difference:
+        type: number
+      expenseAmount:
+        type: number
+      id:
+        type: string
+      numberOfExpenses:
+        type: integer
+      share:
+        type: number
+    type: object
+  models.ExpenseListWrapper:
+    properties:
+      compensations:
+        items:
+          $ref: '#/definitions/models.ExpenseListCompensation'
+        type: array
+      expenseList:
+        $ref: '#/definitions/models.ExpenseList'
+      shares:
+        items:
+          $ref: '#/definitions/models.ExpenseListShare'
+        type: array
     type: object
   models.Participant:
     properties:
@@ -87,7 +124,7 @@ paths:
         name: expenseList
         required: true
         schema:
-          $ref: '#/definitions/models.ExpenseList'
+          $ref: '#/definitions/models.ExpenseListWrapper'
       responses:
         "200":
           description: Success
@@ -109,10 +146,10 @@ paths:
         type: string
       responses:
         "200":
-          description: List of user expenses
+          description: List of user expense lists
           schema:
             items:
-              $ref: '#/definitions/models.Expense'
+              $ref: '#/definitions/models.ExpenseListWrapper'
             type: array
         "400":
           description: Bad Request

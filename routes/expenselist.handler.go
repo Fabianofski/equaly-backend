@@ -15,8 +15,8 @@ import (
 //	@Summary		Get Expense Lists
 //	@Description	Retrieves the list of expenses for a specified user.
 //	@Tags			Expenses
-//	@Param			userId	query	string			true	"User ID to retrieve expenses for"
-//	@Success		200		{array}	models.Expense	"List of user expenses"
+//	@Param			userId	query	string						true	"User ID to retrieve expenses for"
+//	@Success		200		{array}	models.ExpenseListWrapper	"List of user expense lists"
 //	@Failure		400		"Bad Request"
 //	@Failure		500		"Internal Server Error"
 //	@Router			/expense-lists [get]
@@ -46,7 +46,7 @@ func HandlerGetExpenseLists(c echo.Context) error {
 //	@Summary		Create Expense List
 //	@Description	Creates a new Expense list with given data for a specified user
 //	@Tags			Expenses
-//	@Param			expenseList	body		models.ExpenseList	true	"Expense List Data"
+//	@Param			expenseList	body	models.ExpenseListWrapper	true	"Expense List Data"
 //	@Success		200			"Success"
 //	@Failure		400			"Bad Request"
 //	@Failure		500			"Internal Server Error"
@@ -82,16 +82,17 @@ func HandlerCreateExpenseList(c echo.Context) error {
 //	@Summary		Create Expense
 //	@Description	Creates a new Expense for an Expense List
 //	@Tags			Expenses
-//	@Param			expense	body		models.Expense	true	"Expense Data"
-//	@Success		200			"Success"
-//	@Failure		400			"Bad Request"
-//	@Failure		500			"Internal Server Error"
+//	@Param			expense	body	models.Expense	true	"Expense Data"
+//	@Success		200		"Success"
+//	@Failure		400		"Bad Request"
+//	@Failure		500		"Internal Server Error"
 //	@Router			/expense [post]
 func HandlerCreateExpense(c echo.Context) error {
 	log.Println("POST Create new Expense")
 	expense := new(models.Expense)
 	if err := c.Bind(expense); err != nil {
 		log.Println("400 Bad Request")
+        log.Println(err)
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 

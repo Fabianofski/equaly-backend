@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"slices"
+	"strings"
 
 	. "github.com/fabianofski/equaly-backend/models"
 )
@@ -113,7 +114,7 @@ func CreateExpense(expense *Expense) error {
 		expense.Buyer,
 		expense.Amount,
 		expense.Description,
-		expense.Participants,
+		strings.Join(expense.Participants, ","),
         expense.Date,
 	)
 

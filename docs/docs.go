@@ -60,7 +60,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.ExpenseList"
+                            "$ref": "#/definitions/models.ExpenseListWrapper"
                         }
                     }
                 ],
@@ -95,11 +95,11 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of user expenses",
+                        "description": "List of user expense lists",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Expense"
+                                "$ref": "#/definitions/models.ExpenseListWrapper"
                             }
                         }
                     },
@@ -136,7 +136,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "participants": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -175,6 +178,60 @@ const docTemplate = `{
                 },
                 "totalCost": {
                     "type": "number"
+                }
+            }
+        },
+        "models.ExpenseListCompensation": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ExpenseListShare": {
+            "type": "object",
+            "properties": {
+                "difference": {
+                    "type": "number"
+                },
+                "expenseAmount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "numberOfExpenses": {
+                    "type": "integer"
+                },
+                "share": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.ExpenseListWrapper": {
+            "type": "object",
+            "properties": {
+                "compensations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ExpenseListCompensation"
+                    }
+                },
+                "expenseList": {
+                    "$ref": "#/definitions/models.ExpenseList"
+                },
+                "shares": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ExpenseListShare"
+                    }
                 }
             }
         },

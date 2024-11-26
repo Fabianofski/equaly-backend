@@ -19,7 +19,7 @@ type Expense struct {
 func (e *Expense) UnmarshalJSON(data []byte) error {
 	type Alias Expense
 	aux := &struct {
-		Participants string `json:"participants"`
+		Participants json.RawMessage `json:"participants"`
 		*Alias
 	}{
 		Alias: (*Alias)(e),
@@ -29,8 +29,18 @@ func (e *Expense) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if aux.Participants != "" {
-		e.Participants = strings.Split(aux.Participants, ",")
+	if aux.Participants != nil {
+		var participantsStr string
+		if err := json.Unmarshal(aux.Participants, &participantsStr); err == nil {
+			e.Participants = strings.Split(participantsStr, ",")
+		} else {
+			var participantsList []string
+			if err := json.Unmarshal(aux.Participants, &participantsList); err == nil {
+				e.Participants = participantsList
+			} else {
+				return err
+			}
+		}
 	} else {
 		e.Participants = []string{}
 	}
