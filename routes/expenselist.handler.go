@@ -21,11 +21,9 @@ import (
 //	@Failure		500		"Internal Server Error"
 //	@Router			/expense-lists [get]
 func HandlerGetExpenseLists(c echo.Context) error {
-	userId := c.QueryParam("userId")
-	if userId == "" {
-		return c.String(http.StatusBadRequest, "Bad Request")
-	}
-
+    userId := c.Get("userId").(string)
+    log.Println("GET Expense Lists for", userId)
+    
 	expenseLists, err := db.GetExpenseLists(userId)
 	if err != nil {
 		log.Println(err)
