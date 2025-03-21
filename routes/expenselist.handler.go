@@ -15,10 +15,10 @@ import (
 //	@Summary		Get Expense Lists
 //	@Description	Retrieves the list of expenses for a specified user.
 //	@Tags			Expenses
-//	@Param			userId	query	string						true	"User ID to retrieve expenses for"
-//	@Success		200		{array}	models.ExpenseListWrapper	"List of user expense lists"
-//	@Failure		400		"Bad Request"
-//	@Failure		500		"Internal Server Error"
+//	@Param			Authorization	header	string						true	"Bearer Token"
+//	@Success		200				{array}	models.ExpenseListWrapper	"List of user expense lists"
+//	@Failure		400				"Bad Request"
+//	@Failure		500				"Internal Server Error"
 //	@Router			/expense-lists [get]
 func HandlerGetExpenseLists(c echo.Context) error {
     userId := c.Get("userId").(string)
@@ -30,11 +30,12 @@ func HandlerGetExpenseLists(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error requesting data")
 	}
 
-	var expenseListWrappers []models.ExpenseListWrapper
+	var expenseListWrappers = make([]models.ExpenseListWrapper, 0)
 	for _, expenseList := range expenseLists {
 		expenseListWrappers = append(expenseListWrappers, lib.Calculate_shares_and_compensations(expenseList))
 	}
 
+    log.Println(expenseListWrappers)
 	return c.JSON(http.StatusOK, expenseListWrappers)
 
 }
@@ -44,12 +45,14 @@ func HandlerGetExpenseLists(c echo.Context) error {
 //	@Summary		Create Expense List
 //	@Description	Creates a new Expense list with given data for a specified user
 //	@Tags			Expenses
-//	@Param			expenseList	body	models.ExpenseListWrapper	true	"Expense List Data"
-//	@Success		200			"Success"
-//	@Failure		400			"Bad Request"
-//	@Failure		500			"Internal Server Error"
+//	@Param			expenseList		body	models.ExpenseListWrapper	true	"Expense List Data"
+//	@Param			Authorization	header	string						true	"Bearer Token"
+//	@Success		200				"Success"
+//	@Failure		400				"Bad Request"
+//	@Failure		500				"Internal Server Error"
 //	@Router			/expense-list [post]
 func HandlerCreateExpenseList(c echo.Context) error {
+    userId := c.Get("userId").(string)
 	log.Println("POST Create new Expense List")
 	expenseList := new(models.ExpenseList)
 	if err := c.Bind(expenseList); err != nil {
@@ -57,6 +60,8 @@ func HandlerCreateExpenseList(c echo.Context) error {
 		log.Println(err)
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
+
+    expenseList.CreatorId = userId;
 
 	if expenseList.Color == "" || expenseList.Emoji == "" || expenseList.Title == "" || expenseList.Currency == "" {
 		log.Println("400 Bad Request")
@@ -80,10 +85,11 @@ func HandlerCreateExpenseList(c echo.Context) error {
 //	@Summary		Create Expense
 //	@Description	Creates a new Expense for an Expense List
 //	@Tags			Expenses
-//	@Param			expense	body	models.Expense	true	"Expense Data"
-//	@Success		200		"Success"
-//	@Failure		400		"Bad Request"
-//	@Failure		500		"Internal Server Error"
+//	@Param			expense			body	models.Expense	true	"Expense Data"
+//	@Param			Authorization	header	string			true	"Bearer Token"
+//	@Success		200				"Success"
+//	@Failure		400				"Bad Request"
+//	@Failure		500				"Internal Server Error"
 //	@Router			/expense [post]
 func HandlerCreateExpense(c echo.Context) error {
 	log.Println("POST Create new Expense")

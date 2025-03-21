@@ -31,6 +31,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Expense"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -62,6 +69,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.ExpenseListWrapper"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -87,9 +101,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID to retrieve expenses for",
-                        "name": "userId",
-                        "in": "query",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     }
                 ],

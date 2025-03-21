@@ -105,6 +105,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.Expense'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       responses:
         "200":
           description: Success
@@ -125,6 +130,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ExpenseListWrapper'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       responses:
         "200":
           description: Success
@@ -139,9 +149,9 @@ paths:
     get:
       description: Retrieves the list of expenses for a specified user.
       parameters:
-      - description: User ID to retrieve expenses for
-        in: query
-        name: userId
+      - description: Bearer Token
+        in: header
+        name: Authorization
         required: true
         type: string
       responses:
