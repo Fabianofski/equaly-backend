@@ -42,7 +42,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Updated Expense List with new Expense, Compensation and Shares",
+                        "schema": {
+                            "$ref": "#/definitions/models.ExpenseListWrapper"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
@@ -80,7 +83,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Created Expense List",
+                        "schema": {
+                            "$ref": "#/definitions/models.ExpenseListWrapper"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"

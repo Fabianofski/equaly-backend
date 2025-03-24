@@ -44,6 +44,6 @@ func GetPostgresConnection() (*sql.DB, error) {
         return nil, err
 	}
 
-	fmt.Println("Successfully connected!")
+	log.Println("Successfully connected!")
 	return db, nil
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"slices"
@@ -9,7 +10,7 @@ import (
 	. "github.com/fabianofski/equaly-backend/models"
 )
 
-func GetExpenseLists(userId string) ([]ExpenseList, error) {
+func GetExpenseLists(userId string) ([]*ExpenseList, error) {
 	db, err := GetPostgresConnection()
 	if err != nil {
 		return nil, err
@@ -30,32 +31,12 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 	}
 	defer rows.Close()
 
-	var expenseLists []ExpenseList
+	var expenseLists []*ExpenseList
 	for rows.Next() {
-		var expenseList ExpenseList
-		var expensesJSON string
-		var participantsJSON string
-
-		err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-
-		err = json.Unmarshal([]byte(expensesJSON), &expenseList.Expenses)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-        slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
-            return a.Date.Compare(b.Date)
-        })
-
-		err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
+        expenseList, err := RowToExpenseList(rows)
+        if err != nil {
+            return nil, err
+        }
 		expenseLists = append(expenseLists, expenseList)
 	}
 
@@ -66,36 +47,98 @@ func GetExpenseLists(userId string) ([]ExpenseList, error) {
 	return expenseLists, nil
 }
 
-func CreateExpenseList(expenseList *ExpenseList) error {
+func GetExpenseList(listId string) (*ExpenseList, error) {
+    db, err := GetPostgresConnection()
+    if err != nil {
+        return nil, err
+    }
+   
+	rows, err := db.Query(`
+            SELECT ExpenseLists.*,
+                   COALESCE(SUM(Expenses.amount), 0)                                   AS totalCost,
+                   COALESCE(json_agg(row_to_json(Expenses)) FILTER (WHERE Expenses IS NOT NULL), '[]'::json) AS expenses
+            FROM ExpenseLists
+                     LEFT JOIN Expenses ON ExpenseLists.id = Expenses.expenseListId
+            WHERE ExpenseLists.id = $1 
+            GROUP BY ExpenseLists.id;
+        `, listId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+    rows.Next()
+    expenseList, err := RowToExpenseList(rows)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+    return expenseList, nil
+}
+
+func RowToExpenseList(rows *sql.Rows) (*ExpenseList, error) {
+    expenseList := &ExpenseList{}
+    var expensesJSON string
+    var participantsJSON string
+
+    err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
+    if err != nil {
+        log.Println(err)
+        return nil, err
+    }
+
+    err = json.Unmarshal([]byte(expensesJSON), &expenseList.Expenses)
+    if err != nil {
+        log.Println(err)
+        return nil, err
+    }
+    slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
+        return a.Date.Compare(b.Date)
+    })
+
+    err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
+    if err != nil {
+        log.Println(err)
+        return nil, err
+    }
+
+    return expenseList, nil
+}
+
+func CreateExpenseList(expenseList *ExpenseList) (string, error) {
 	db, err := GetPostgresConnection()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	query := `
         INSERT INTO ExpenseLists (color, emoji, title, creatorId, currency, participants)
         VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id 
     `
 
 	participants, err := json.Marshal(expenseList.Participants)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = db.Exec(query,
+    var id string
+    err = db.QueryRow(query,
 		expenseList.Color,
 		expenseList.Emoji,
 		expenseList.Title,
 		expenseList.CreatorId,
 		expenseList.Currency,
 		participants,
-	)
+	).Scan(&id)
+    log.Println(id)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func CreateExpense(expense *Expense) error {
