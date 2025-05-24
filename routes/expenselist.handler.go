@@ -21,9 +21,9 @@ import (
 //	@Failure		500				"Internal Server Error"
 //	@Router			/expense-lists [get]
 func HandlerGetExpenseLists(c echo.Context) error {
-    userId := c.Get("userId").(string)
-    log.Println("GET Expense Lists for", userId)
-    
+	userId := c.Get("userId").(string)
+	log.Println("GET Expense Lists for", userId)
+
 	expenseLists, err := db.GetExpenseLists(userId)
 	if err != nil {
 		log.Println(err)
@@ -51,7 +51,7 @@ func HandlerGetExpenseLists(c echo.Context) error {
 //	@Failure		500				"Internal Server Error"
 //	@Router			/expense-list [post]
 func HandlerCreateExpenseList(c echo.Context) error {
-    userId := c.Get("userId").(string)
+	userId := c.Get("userId").(string)
 	log.Println("POST Create new Expense List")
 	expenseList := new(models.ExpenseList)
 	if err := c.Bind(expenseList); err != nil {
@@ -60,7 +60,7 @@ func HandlerCreateExpenseList(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
-    expenseList.CreatorId = userId;
+	expenseList.CreatorId = userId
 
 	if expenseList.Color == "" || expenseList.Emoji == "" || expenseList.Title == "" || expenseList.Currency == "" {
 		log.Println("400 Bad Request")
@@ -74,8 +74,8 @@ func HandlerCreateExpenseList(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error posting data")
 	}
 
-    expenseList.ID = id
-    expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList) 
+	expenseList.ID = id
+	expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
 
 	log.Println("200 Success")
 	return c.JSON(http.StatusOK, expenseListWrapper)
@@ -98,7 +98,7 @@ func HandlerCreateExpense(c echo.Context) error {
 	expense := new(models.Expense)
 	if err := c.Bind(expense); err != nil {
 		log.Println("400 Bad Request")
-        log.Println(err)
+		log.Println(err)
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
@@ -109,12 +109,12 @@ func HandlerCreateExpense(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error posting data")
 	}
 
-    expenseList, err := db.GetExpenseList(expense.ExpenseListId)
-    if err != nil {
+	expenseList, err := db.GetExpenseList(expense.ExpenseListId)
+	if err != nil {
 		return c.String(http.StatusInternalServerError, "Error posting data")
-    }
+	}
 
-    expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
+	expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
 
 	log.Println("200 Sucess")
 	return c.JSON(http.StatusOK, expenseListWrapper)

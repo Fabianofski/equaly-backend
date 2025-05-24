@@ -33,10 +33,10 @@ func GetExpenseLists(userId string) ([]*ExpenseList, error) {
 
 	var expenseLists []*ExpenseList
 	for rows.Next() {
-        expenseList, err := RowToExpenseList(rows)
-        if err != nil {
-            return nil, err
-        }
+		expenseList, err := RowToExpenseList(rows)
+		if err != nil {
+			return nil, err
+		}
 		expenseLists = append(expenseLists, expenseList)
 	}
 
@@ -48,11 +48,11 @@ func GetExpenseLists(userId string) ([]*ExpenseList, error) {
 }
 
 func GetExpenseList(listId string) (*ExpenseList, error) {
-    db, err := GetPostgresConnection()
-    if err != nil {
-        return nil, err
-    }
-   
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := db.Query(`
             SELECT ExpenseLists.*,
                    COALESCE(SUM(Expenses.amount), 0)                                   AS totalCost,
@@ -68,42 +68,42 @@ func GetExpenseList(listId string) (*ExpenseList, error) {
 	}
 	defer rows.Close()
 
-    rows.Next()
-    expenseList, err := RowToExpenseList(rows)
+	rows.Next()
+	expenseList, err := RowToExpenseList(rows)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-    return expenseList, nil
+	return expenseList, nil
 }
 
 func RowToExpenseList(rows *sql.Rows) (*ExpenseList, error) {
-    expenseList := &ExpenseList{}
-    var expensesJSON string
-    var participantsJSON string
+	expenseList := &ExpenseList{}
+	var expensesJSON string
+	var participantsJSON string
 
-    err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
-    if err != nil {
-        log.Println(err)
-        return nil, err
-    }
+	err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
-    err = json.Unmarshal([]byte(expensesJSON), &expenseList.Expenses)
-    if err != nil {
-        log.Println(err)
-        return nil, err
-    }
-    slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
-        return a.Date.Compare(b.Date)
-    })
+	err = json.Unmarshal([]byte(expensesJSON), &expenseList.Expenses)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
+		return a.Date.Compare(b.Date)
+	})
 
-    err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
-    if err != nil {
-        log.Println(err)
-        return nil, err
-    }
+	err = json.Unmarshal([]byte(participantsJSON), &expenseList.Participants)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
-    return expenseList, nil
+	return expenseList, nil
 }
 
 func CreateExpenseList(expenseList *ExpenseList) (string, error) {
@@ -123,8 +123,8 @@ func CreateExpenseList(expenseList *ExpenseList) (string, error) {
 		return "", err
 	}
 
-    var id string
-    err = db.QueryRow(query,
+	var id string
+	err = db.QueryRow(query,
 		expenseList.Color,
 		expenseList.Emoji,
 		expenseList.Title,
@@ -132,7 +132,7 @@ func CreateExpenseList(expenseList *ExpenseList) (string, error) {
 		expenseList.Currency,
 		participants,
 	).Scan(&id)
-    log.Println(id)
+	log.Println(id)
 
 	if err != nil {
 		return "", err
@@ -158,7 +158,7 @@ func CreateExpense(expense *Expense) error {
 		expense.Amount,
 		expense.Description,
 		strings.Join(expense.Participants, ","),
-        expense.Date,
+		expense.Date,
 	)
 
 	if err != nil {

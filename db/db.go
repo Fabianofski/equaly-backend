@@ -11,13 +11,13 @@ import (
 )
 
 var (
-    db *sql.DB
+	db *sql.DB
 )
 
 func GetPostgresConnection() (*sql.DB, error) {
-    if db != nil {
-        return db, nil
-    }
+	if db != nil {
+		return db, nil
+	}
 
 	host := os.Getenv("POSTGRES_HOST")
 	portStr := os.Getenv("POSTGRES_PORT")
@@ -28,7 +28,7 @@ func GetPostgresConnection() (*sql.DB, error) {
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		log.Fatalf("Error converting POSTGRES_PORT to integer: %v", err)
-        return nil, err
+		return nil, err
 	}
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -36,12 +36,12 @@ func GetPostgresConnection() (*sql.DB, error) {
 		host, port, user, password, dbname)
 	db, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
-        return nil, err
+		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
-        return nil, err
+		return nil, err
 	}
 
 	log.Println("Successfully connected!")

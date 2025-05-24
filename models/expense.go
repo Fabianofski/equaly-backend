@@ -1,9 +1,9 @@
 package models
 
 import (
-    "time"
-    "encoding/json"
-    "strings"
+	"encoding/json"
+	"strings"
+	"time"
 )
 
 type Expense struct {
