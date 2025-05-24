@@ -18,11 +18,14 @@ func GetExpenseLists(userId string) ([]*ExpenseList, error) {
 
 	rows, err := db.Query(`
             SELECT ExpenseLists.*,
-                   COALESCE(SUM(Expenses.amount), 0)                                   AS totalCost,
-                   COALESCE(json_agg(row_to_json(Expenses)) FILTER (WHERE Expenses IS NOT NULL), '[]'::json) AS expenses
+							COALESCE(SUM(Expenses.amount), 0) AS totalCost,
+							COALESCE(json_agg(row_to_json(Expenses)) FILTER (WHERE Expenses IS NOT NULL), '[]'::json) AS expenses
             FROM ExpenseLists
-                     LEFT JOIN Expenses ON ExpenseLists.id = Expenses.expenseListId
+							LEFT JOIN Expenses ON ExpenseLists.id = Expenses.expenseListId
             WHERE ExpenseLists.creatorId = $1 
+							OR ExpenseLists.id IN (
+								SELECT expenseListId FROM ExpenseListsUsers WHERE userId = $1
+							)
             GROUP BY ExpenseLists.id;
         `, userId)
 	if err != nil {
@@ -82,7 +85,18 @@ func RowToExpenseList(rows *sql.Rows) (*ExpenseList, error) {
 	var expensesJSON string
 	var participantsJSON string
 
-	err := rows.Scan(&expenseList.ID, &expenseList.Color, &expenseList.Emoji, &expenseList.Title, &expenseList.CreatorId, &expenseList.Currency, &participantsJSON, &expenseList.TotalCost, &expensesJSON)
+	err := rows.Scan(
+		&expenseList.ID,
+		&expenseList.Color,
+		&expenseList.Emoji,
+		&expenseList.Title,
+		&expenseList.CreatorId,
+		&expenseList.Currency,
+		&participantsJSON,
+		&expenseList.InviteCode,
+		&expenseList.TotalCost,
+		&expensesJSON,
+	)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -166,4 +180,29 @@ func CreateExpense(expense *Expense) error {
 	}
 
 	return nil
+}
+
+func IsUserAuthorized(expenseListId string, userId string) (bool, error) {
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return false, err
+	}
+
+	var isAuthorized bool
+
+	err = db.QueryRow(`
+			SELECT EXISTS (
+					SELECT 1 FROM ExpenseLists
+					WHERE id = $1 AND creatorId = $2
+					UNION
+					SELECT 1 FROM ExpenseListsUsers
+					WHERE expenseListId = $1 AND userId = $2
+			)
+	`, expenseListId, userId).Scan(&isAuthorized)
+
+	if err != nil {
+		return false, err
+	}
+
+	return isAuthorized, nil
 }
