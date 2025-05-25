@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fabianofski/equaly-backend/db"
+	"github.com/fabianofski/equaly-backend/api/db"
 	"github.com/fabianofski/equaly-backend/lib"
 	"github.com/fabianofski/equaly-backend/models"
 	"github.com/labstack/echo/v4"

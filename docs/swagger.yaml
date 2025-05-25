@@ -203,4 +203,23 @@ paths:
       summary: Get Expense Lists
       tags:
       - Expenses
+  /static/profile:
+    get:
+      description: Retrieves presigned url of profile picture
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: "Success\"\tstring\t\"Profile Picture presigned URL"
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get Profile Picture presigned Url
+      tags:
+      - Expenses
 swagger: "2.0"
