@@ -35,8 +35,8 @@ func HandlerGetExpenseLists(c echo.Context) error {
 		expenseListWrappers = append(expenseListWrappers, lib.Calculate_shares_and_compensations(*expenseList))
 	}
 
+	log.Println("200 Success")
 	return c.JSON(http.StatusOK, expenseListWrappers)
-
 }
 
 // HandlerCreateExpenseLists godoc
@@ -44,7 +44,7 @@ func HandlerGetExpenseLists(c echo.Context) error {
 //	@Summary		Create Expense List
 //	@Description	Creates a new Expense list with given data for a specified user
 //	@Tags			Expenses
-//	@Param			expenseList		body		models.ExpenseListWrapper	true	"Expense List Data"
+//	@Param			expenseList		body		models.ExpenseList			true	"Expense List Data"
 //	@Param			Authorization	header		string						true	"Bearer Token"
 //	@Success		200				{object}	models.ExpenseListWrapper	"Created Expense List"
 //	@Failure		400				"Bad Request"
@@ -87,7 +87,7 @@ func HandlerCreateExpenseList(c echo.Context) error {
 //	@Summary		Join Expense List
 //	@Description	Join ExpenseList with valid inviteCode
 //	@Tags			Expenses
-//	@Param			expenseListId query	string	true	"Expense List Id"
+//	@Param			expenseListId	query	string	true	"Expense List Id"
 //	@Param			inviteCode		query	string	true	"Invite Code"
 //	@Param			Authorization	header	string	true	"Bearer Token"
 //	@Success		200				"Success"

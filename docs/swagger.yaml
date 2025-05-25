@@ -133,7 +133,7 @@ paths:
         name: expenseList
         required: true
         schema:
-          $ref: '#/definitions/models.ExpenseListWrapper'
+          $ref: '#/definitions/models.ExpenseList'
       - description: Bearer Token
         in: header
         name: Authorization
@@ -203,10 +203,20 @@ paths:
       summary: Get Expense Lists
       tags:
       - Expenses
-  /static/profile:
+  /static/profile/{expenseListId}/{participantId}:
     get:
       description: Retrieves presigned url of profile picture
       parameters:
+      - description: Expense List Id
+        in: path
+        name: expenseListId
+        required: true
+        type: string
+      - description: Participant Id
+        in: path
+        name: participantId
+        required: true
+        type: string
       - description: Bearer Token
         in: header
         name: Authorization
@@ -220,6 +230,39 @@ paths:
         "500":
           description: Internal Server Error
       summary: Get Profile Picture presigned Url
+      tags:
+      - Expenses
+    post:
+      description: Upload Profile Picture of Participant
+      parameters:
+      - description: Expense List Id
+        in: path
+        name: expenseListId
+        required: true
+        type: string
+      - description: Participant Id
+        in: path
+        name: participantId
+        required: true
+        type: string
+      - description: "Profile\tPicture"
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Upload Profile Picture of Participant
       tags:
       - Expenses
 swagger: "2.0"

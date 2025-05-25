@@ -107,7 +107,7 @@ func RowToExpenseList(rows *sql.Rows) (*ExpenseList, error) {
 		log.Println(err)
 		return nil, err
 	}
-	slices.SortFunc(expenseList.Expenses, func(a, b Expense) int {
+	slices.SortFunc(expenseList.Expenses, func(a, b *Expense) int {
 		return a.Date.Compare(b.Date)
 	})
 
@@ -180,6 +180,28 @@ func CreateExpense(expense *Expense) error {
 	}
 
 	return nil
+}
+
+func IsUserOwner(expenseListId string, userId string) (bool, error) {
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return false, err
+	}
+
+	var isOwner bool
+
+	err = db.QueryRow(`
+			SELECT EXISTS (
+					SELECT 1 FROM ExpenseLists
+					WHERE id = $1 AND creatorId = $2
+			)
+	`, expenseListId, userId).Scan(&isOwner)
+
+	if err != nil {
+		return false, err
+	}
+
+	return isOwner, nil
 }
 
 func IsUserAuthorized(expenseListId string, userId string) (bool, error) {

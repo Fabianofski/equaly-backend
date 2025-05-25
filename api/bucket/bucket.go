@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -37,9 +38,23 @@ func CreatePresignedUrl(bucket string, path string) (string, error) {
 
 	url, err := minioClient.PresignedGetObject(context.Background(), bucket, path, time.Hour, nil)
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
 	return url.String(), nil
+}
+
+func UploadFile(bucket string, path string, file io.Reader, size int64, contentType string) error {
+	minioClient, err := GetMinioConnection()
+	if err != nil {
+		return err
+	}
+
+	info, err := minioClient.PutObject(context.Background(), bucket, path, file, size, minio.PutObjectOptions{ContentType: contentType})
+	if err != nil {
+		return err
+	}
+	log.Println(info)
+
+	return nil
 }

@@ -70,7 +70,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.ExpenseListWrapper"
+                            "$ref": "#/definitions/models.ExpenseList"
                         }
                     },
                     {
@@ -175,7 +175,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/static/profile": {
+        "/static/profile/{expenseListId}/{participantId}": {
             "get": {
                 "description": "Retrieves presigned url of profile picture",
                 "tags": [
@@ -183,6 +183,20 @@ const docTemplate = `{
                 ],
                 "summary": "Get Profile Picture presigned Url",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense List Id",
+                        "name": "expenseListId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Participant Id",
+                        "name": "participantId",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Bearer Token",
@@ -194,6 +208,54 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Success\"\tstring\t\"Profile Picture presigned URL"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "description": "Upload Profile Picture of Participant",
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Upload Profile Picture of Participant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense List Id",
+                        "name": "expenseListId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Participant Id",
+                        "name": "participantId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Profile\tPicture",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
                     },
                     "400": {
                         "description": "Bad Request"
