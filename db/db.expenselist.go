@@ -206,3 +206,47 @@ func IsUserAuthorized(expenseListId string, userId string) (bool, error) {
 
 	return isAuthorized, nil
 }
+
+func IsInviteCodeValid(expenseListId string, inviteCode string) (bool, error) {
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return false, err
+	}
+
+	var inviteCodeValid bool
+
+	err = db.QueryRow(`
+			SELECT EXISTS (
+					SELECT 1 FROM ExpenseLists
+					WHERE id = $1 AND inviteCode = $2
+			)
+	`, expenseListId, inviteCode).Scan(&inviteCodeValid)
+
+	if err != nil {
+		return false, err
+	}
+
+	return inviteCodeValid, nil
+
+}
+
+func JoinExpenseList(expenseListId string, userId string) error {
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return err
+	}
+
+	query := `
+        INSERT INTO ExpenseListsUsers (expenseListId, userId)
+        VALUES ($1, $2)
+    `
+
+	_, err = db.Exec(query, expenseListId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

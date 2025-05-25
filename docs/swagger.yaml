@@ -35,6 +35,8 @@ definitions:
         type: array
       id:
         type: string
+      inviteCode:
+        type: string
       participants:
         items:
           $ref: '#/definitions/models.Participant'
@@ -147,6 +149,35 @@ paths:
         "500":
           description: Internal Server Error
       summary: Create Expense List
+      tags:
+      - Expenses
+  /expense-list/join:
+    post:
+      description: Join ExpenseList with valid inviteCode
+      parameters:
+      - description: Expense List Id
+        in: query
+        name: expenseListId
+        required: true
+        type: string
+      - description: Invite Code
+        in: query
+        name: inviteCode
+        required: true
+        type: string
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Join Expense List
       tags:
       - Expenses
   /expense-lists:

@@ -51,5 +51,6 @@ func SetupRoutes(app *echo.Group) {
 
 	app.GET("/expense-lists", HandlerGetExpenseLists)
 	app.POST("/expense-list", HandlerCreateExpenseList)
+	app.POST("/expense-list/join", HandlerJoinExpenseList)
 	app.POST("/expense", HandlerCreateExpense)
 }

@@ -97,6 +97,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/expense-list/join": {
+            "post": {
+                "description": "Join ExpenseList with valid inviteCode",
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Join Expense List",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense List Id",
+                        "name": "expenseListId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Invite Code",
+                        "name": "inviteCode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/expense-lists": {
             "get": {
                 "description": "Retrieves the list of expenses for a specified user.",
@@ -185,6 +228,9 @@ const docTemplate = `{
                     }
                 },
                 "id": {
+                    "type": "string"
+                },
+                "inviteCode": {
                     "type": "string"
                 },
                 "participants": {

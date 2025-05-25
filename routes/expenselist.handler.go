@@ -27,7 +27,7 @@ func HandlerGetExpenseLists(c echo.Context) error {
 	expenseLists, err := db.GetExpenseLists(userId)
 	if err != nil {
 		log.Println(err)
-		return c.String(http.StatusInternalServerError, "Error requesting data")
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
 	var expenseListWrappers = make([]models.ExpenseListWrapper, 0)
@@ -57,21 +57,21 @@ func HandlerCreateExpenseList(c echo.Context) error {
 	if err := c.Bind(expenseList); err != nil {
 		log.Println("400 Bad Request")
 		log.Println(err)
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.String(http.StatusBadRequest, "400 Bad Request")
 	}
 
 	expenseList.CreatorId = userId
 
 	if expenseList.Color == "" || expenseList.Emoji == "" || expenseList.Title == "" || expenseList.Currency == "" {
 		log.Println("400 Bad Request")
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.String(http.StatusBadRequest, "400 Bad Request")
 	}
 
 	id, err := db.CreateExpenseList(expenseList)
 	if err != nil {
 		log.Println("500 Internal Server Error")
 		log.Println(err)
-		return c.String(http.StatusInternalServerError, "Error posting data")
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
 	expenseList.ID = id
@@ -79,6 +79,56 @@ func HandlerCreateExpenseList(c echo.Context) error {
 
 	log.Println("200 Success")
 	return c.JSON(http.StatusOK, expenseListWrapper)
+
+}
+
+// HandlerJoinExpenseList godoc
+//
+//	@Summary		Join Expense List
+//	@Description	Join ExpenseList with valid inviteCode
+//	@Tags			Expenses
+//	@Param			expenseListId query	string	true	"Expense List Id"
+//	@Param			inviteCode		query	string	true	"Invite Code"
+//	@Param			Authorization	header	string	true	"Bearer Token"
+//	@Success		200				"Success"
+//	@Failure		400				"Bad Request"
+//	@Failure		500				"Internal Server Error"
+//	@Router			/expense-list/join [post]
+func HandlerJoinExpenseList(c echo.Context) error {
+	userId := c.Get("userId").(string)
+	log.Println("POST Create new Expense List")
+	inviteCode := c.QueryParam("inviteCode")
+	expenseListId := c.QueryParam("expenseListId")
+
+	if inviteCode == "" || expenseListId == "" {
+		log.Println("400 Bad Request")
+		return c.String(http.StatusBadRequest, "400 Bad Request")
+	}
+
+	validCode, err := db.IsInviteCodeValid(expenseListId, inviteCode)
+	if err != nil {
+		log.Println("500 Internal Server Error")
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
+	}
+
+	if !validCode {
+		log.Println("403 Forbidden")
+		return c.String(http.StatusForbidden, "403 Forbidden")
+	}
+
+	err = db.JoinExpenseList(expenseListId, userId)
+	if err != nil {
+		log.Println("500 Internal Server Error")
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
+	}
+
+	log.Println(userId)
+	log.Println(inviteCode)
+
+	log.Println("200 Success")
+	return c.JSON(http.StatusOK, nil)
 
 }
 
@@ -100,14 +150,14 @@ func HandlerCreateExpense(c echo.Context) error {
 	if err := c.Bind(expense); err != nil {
 		log.Println("400 Bad Request")
 		log.Println(err)
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.String(http.StatusBadRequest, "400 Bad Request")
 	}
 
 	authorized, err := db.IsUserAuthorized(expense.ExpenseListId, userId)
 	if err != nil {
 		log.Println("500 Internal Server Error")
 		log.Println(err)
-		return c.String(http.StatusInternalServerError, "Error posting data")
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
 	if !authorized {
@@ -119,12 +169,12 @@ func HandlerCreateExpense(c echo.Context) error {
 	if err != nil {
 		log.Println("500 Internal Server Error")
 		log.Println(err)
-		return c.String(http.StatusInternalServerError, "Error posting data")
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
 	expenseList, err := db.GetExpenseList(expense.ExpenseListId)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Error posting data")
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
 	expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
