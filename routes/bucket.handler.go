@@ -47,6 +47,8 @@ func HandlerGetProfilePicture(c echo.Context) error {
 
 	url, err := bucket.CreatePresignedUrl("equaly", expenseListId+"/profile-"+participantId)
 	if err != nil {
+		log.Println("500 Internal Server Error")
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
@@ -109,6 +111,7 @@ func HandlerPostProfilePicture(c echo.Context) error {
 	err = bucket.UploadFile("equaly", expenseListId+"/profile-"+participantId, src, header.Size, header.Header.Get("Content-Type"))
 	if err != nil {
 		log.Println("500 Internal Server Error")
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
