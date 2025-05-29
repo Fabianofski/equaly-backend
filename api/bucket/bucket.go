@@ -15,7 +15,7 @@ func GetMinioConnection() (*minio.Client, error) {
 	endpoint := os.Getenv("BUCKET_ENDPOINT")
 	accessKeyID := os.Getenv("BUCKET_USER")
 	secretAccessKey := os.Getenv("BUCKET_PASSWORD")
-	useSSL := false
+	useSSL := os.Getenv("BUCKET_SSL") == "true"
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
