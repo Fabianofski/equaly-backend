@@ -83,14 +83,11 @@ definitions:
     type: object
   models.Participant:
     properties:
-      avatarUrl:
-        type: string
       id:
         type: string
       name:
         type: string
     type: object
-host: localhost:3000
 info:
   contact: {}
   description: This is the backend for the equaly cost management app

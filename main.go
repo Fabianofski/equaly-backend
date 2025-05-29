@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
-	_ "github.com/fabianofski/equaly-backend/docs"
+	"github.com/fabianofski/equaly-backend/docs"
 	"github.com/fabianofski/equaly-backend/routes"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -15,7 +16,6 @@ import (
 //	@version		1.0
 //	@description	This is the backend for the equaly cost management app
 
-// @host		localhost:3000
 // @BasePath	/v1
 func main() {
 	err := godotenv.Load()
@@ -36,5 +36,6 @@ func main() {
 	version := app.Group("/v1")
 	routes.SetupRoutes(version)
 
+	docs.SwaggerInfo.Host = os.Getenv("API_HOST")
 	app.Logger.Fatal(app.Start(":3000"))
 }

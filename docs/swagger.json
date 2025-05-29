@@ -6,7 +6,6 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:3000",
     "basePath": "/v1",
     "paths": {
         "/expense": {
@@ -389,9 +388,6 @@
         "models.Participant": {
             "type": "object",
             "properties": {
-                "avatarUrl": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
