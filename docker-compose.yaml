@@ -47,4 +47,3 @@ services:
     environment:
       POSTGRES_HOST: "postgres"
       POSTGRES_PORT: "5432"
-      BUCKET_ENDPOINT: "minio:9000"
