@@ -272,3 +272,27 @@ func JoinExpenseList(expenseListId string, userId string) error {
 	return nil
 
 }
+
+func IsMemberOfExpenseList(expenseListId string, userId string) (bool, error) {
+	db, err := GetPostgresConnection()
+	if err != nil {
+		return false, err
+	}
+
+	var isMemberOfExpenseList bool
+
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM ExpenseLists el
+			LEFT JOIN ExpenseListsUsers elu ON el.id = elu.expenseListId
+			WHERE el.id = $1 AND (el.creatorId = $2 OR elu.userId = $2)
+		)
+	`, expenseListId, userId).Scan(&isMemberOfExpenseList)
+
+	if err != nil {
+		return false, err
+	}
+
+	return isMemberOfExpenseList, nil
+}

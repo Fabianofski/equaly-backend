@@ -50,6 +50,7 @@ func SetupRoutes(app *echo.Group) {
 	app.Use(GoogleAuthMiddleware)
 
 	app.GET("/expense-lists", HandlerGetExpenseLists)
+	app.GET("/expense-list", HandlerGetExpenseListWithInviteCode)
 	app.POST("/expense-list", HandlerCreateExpenseList)
 	app.POST("/expense-list/join", HandlerJoinExpenseList)
 	app.POST("/expense", HandlerCreateExpense)

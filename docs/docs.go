@@ -57,6 +57,50 @@ const docTemplate = `{
             }
         },
         "/expense-list": {
+            "get": {
+                "description": "Get ExpenseList with valid inviteCode",
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Get Expense List With Invite Code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense List Id",
+                        "name": "expenseListId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Invite Code",
+                        "name": "inviteCode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created Expense List",
+                        "schema": {
+                            "$ref": "#/definitions/models.ExpenseListWrapper"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new Expense list with given data for a specified user",
                 "tags": [
@@ -129,7 +173,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Created Expense List",
+                        "schema": {
+                            "$ref": "#/definitions/models.ExpenseListWrapper"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"

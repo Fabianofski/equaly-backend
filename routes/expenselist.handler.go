@@ -82,21 +82,20 @@ func HandlerCreateExpenseList(c echo.Context) error {
 
 }
 
-// HandlerJoinExpenseList godoc
+// HandlerGetExpenseListWithInviteCode godoc
 //
-//	@Summary		Join Expense List
-//	@Description	Join ExpenseList with valid inviteCode
+//	@Summary		Get Expense List With Invite Code
+//	@Description	Get ExpenseList with valid inviteCode
 //	@Tags			Expenses
-//	@Param			expenseListId	query	string	true	"Expense List Id"
-//	@Param			inviteCode		query	string	true	"Invite Code"
-//	@Param			Authorization	header	string	true	"Bearer Token"
-//	@Success		200				"Success"
+//	@Param			expenseListId	query		string						true	"Expense List Id"
+//	@Param			inviteCode		query		string						true	"Invite Code"
+//	@Param			Authorization	header		string						true	"Bearer Token"
+//	@Success		200				{object}	models.ExpenseListWrapper	"Created Expense List"
 //	@Failure		400				"Bad Request"
 //	@Failure		500				"Internal Server Error"
-//	@Router			/expense-list/join [post]
-func HandlerJoinExpenseList(c echo.Context) error {
-	userId := c.Get("userId").(string)
-	log.Println("POST Create new Expense List")
+//	@Router			/expense-list [get]
+func HandlerGetExpenseListWithInviteCode(c echo.Context) error {
+	log.Println("GET Expense List with Invite Code")
 	inviteCode := c.QueryParam("inviteCode")
 	expenseListId := c.QueryParam("expenseListId")
 
@@ -117,6 +116,58 @@ func HandlerJoinExpenseList(c echo.Context) error {
 		return c.String(http.StatusForbidden, "403 Forbidden")
 	}
 
+	expenseList, err := db.GetExpenseList(expenseListId)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
+	}
+
+	expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
+
+	log.Println("200 Sucess")
+	return c.JSON(http.StatusOK, expenseListWrapper)
+}
+
+// HandlerJoinExpenseList godoc
+//
+//	@Summary		Join Expense List
+//	@Description	Join ExpenseList with valid inviteCode
+//	@Tags			Expenses
+//	@Param			expenseListId	query		string						true	"Expense List Id"
+//	@Param			inviteCode		query		string						true	"Invite Code"
+//	@Param			Authorization	header		string						true	"Bearer Token"
+//	@Success		200				{object}	models.ExpenseListWrapper	"Created Expense List"
+//	@Failure		400				"Bad Request"
+//	@Failure		500				"Internal Server Error"
+//	@Router			/expense-list/join [post]
+func HandlerJoinExpenseList(c echo.Context) error {
+	userId := c.Get("userId").(string)
+	log.Println("POST Join Expense List")
+	inviteCode := c.QueryParam("inviteCode")
+	expenseListId := c.QueryParam("expenseListId")
+
+	if inviteCode == "" || expenseListId == "" {
+		log.Println("400 Bad Request")
+		return c.String(http.StatusBadRequest, "400 Bad Request")
+	}
+
+	validCode, err := db.IsInviteCodeValid(expenseListId, inviteCode)
+	if err != nil {
+		log.Println("500 Internal Server Error")
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
+	}
+
+	if !validCode {
+		log.Println("403 Forbidden")
+		return c.String(http.StatusForbidden, "403 Forbidden")
+	}
+
+	isMemberOfList, err := db.IsMemberOfExpenseList(expenseListId, userId)
+	if isMemberOfList {
+		log.Println("409 Conflict")
+		return c.String(http.StatusConflict, "409 Conflict")
+	}
+
 	err = db.JoinExpenseList(expenseListId, userId)
 	if err != nil {
 		log.Println("500 Internal Server Error")
@@ -124,12 +175,15 @@ func HandlerJoinExpenseList(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
 	}
 
-	log.Println(userId)
-	log.Println(inviteCode)
+	expenseList, err := db.GetExpenseList(expenseListId)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "500 Internal Server Error")
+	}
 
-	log.Println("200 Success")
-	return c.JSON(http.StatusOK, nil)
+	expenseListWrapper := lib.Calculate_shares_and_compensations(*expenseList)
 
+	log.Println("200 Sucess")
+	return c.JSON(http.StatusOK, expenseListWrapper)
 }
 
 // HandlerCreateExpense godoc
